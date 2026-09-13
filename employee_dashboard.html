@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Employee Dashboard - Prayosha Construction</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #1a1a1a; color: #ffffff; padding: 20px; }
+        .dashboard-container { max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 10px; text-align: center; margin-top: 50px; }
+        h1 { color: #f7a838; margin-bottom: 10px; }
+        p { color: #aaaaaa; margin-bottom: 20px; }
+        .user-card { background: #2a2a2a; padding: 15px; border-radius: 8px; border-left: 4px solid #f7a838; text-align: left; }
+        .user-card strong { color: #ffffff; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Employee Dashboard</h1>
+        <p>Login successful. Environment securely connected.</p>
+        
+        <div class="user-card">
+            <p><strong>Name:</strong> <span id="display-name">Loading...</span></p>
+            <p><strong>Role:</strong> <span id="display-role">Loading...</span></p>
+            <p><strong>Assigned Project:</strong> <span id="display-project">Loading...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Fetch offline data saved during the login process
+        document.addEventListener("DOMContentLoaded", () => {
+            const userName = localStorage.getItem('userName');
+            const userRole = localStorage.getItem('userRole');
+            const assignedProject = localStorage.getItem('assignedProject');
+
+            // Security check: If no token exists, boot them back to login
+            if (!localStorage.getItem('userToken')) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Populate the UI
+            document.getElementById('display-name').innerText = userName || "Unknown";
+            document.getElementById('display-role').innerText = userRole || "Unknown";
+            document.getElementById('display-project').innerText = assignedProject || "Unknown";
+        });
+    </script>
+</body>
+</html>
