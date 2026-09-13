@@ -1,5 +1,5 @@
 // Replace this with the URL you get after deploying your Google Apps Script as a Web App
-const GAS_API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxHKLn4nZPKN-EsXlROyNGU6PqD-w0_FUj9oiPed0nH_MrUyKUk8Jt2LQHrmb1L08ysaA/exec";
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
