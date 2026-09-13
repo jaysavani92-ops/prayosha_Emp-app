@@ -1,0 +1,145 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body, html {
+    height: 100%;
+    width: 100%;
+    background-color: #1a1a1a;
+}
+
+/* Background Image with Dark/Warm Overlay */
+.login-container {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    /* Replace 'construction-bg.jpg' with your hosted background image URL */
+    background: linear-gradient(rgba(40, 30, 20, 0.7), rgba(20, 20, 20, 0.9)), url('construction-bg.jpg') no-repeat center center/cover;
+}
+
+/* White Logo Card */
+.logo-box {
+    background-color: #ffffff;
+    padding: 20px 40px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+    max-width: 200px;
+    height: auto;
+    display: block;
+}
+
+/* Typography */
+.text-content {
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 30px;
+}
+
+.text-content h1 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 10px;
+}
+
+.text-content p {
+    color: #e0e0e0;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+/* Form Styles */
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Translucent PIN Input */
+.input-group input {
+    width: 100%;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+    color: #ffffff;
+    font-size: 2rem;
+    text-align: center;
+    letter-spacing: 15px;
+    outline: none;
+    transition: border 0.3s ease, background 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: #f7a838;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.5rem;
+    letter-spacing: 10px;
+    transform: translateY(-5px);
+}
+
+/* Yellow Pill Button */
+.login-btn {
+    width: 100%;
+    padding: 16px;
+    background-color: #f7a838;
+    border: none;
+    border-radius: 30px;
+    color: #000000;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+.login-btn:hover {
+    background-color: #e59626;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Footer Link */
+.footer-links {
+    margin-top: 30px;
+}
+
+.footer-links a {
+    color: #aaaaaa;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prayosha Construction App - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Replace 'logo.png' with your actual hosted logo URL -->
+        <div class="logo-box">
+            <img src="logo.png" alt="Prayosha Logo" class="logo">
+        </div>
+
+        <div class="text-content">
+            <h1>Building A Better<br>Tomorrow</h1>
+            <p>Your all-in-one solution for smarter construction management.</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+            <div class="input-group">
+                <!-- Using a password input centered to mimic the PIN dots in the design -->
+                <input type="password" id="userPin" name="userPin" maxlength="6" placeholder="• • • •" required autocomplete="off">
+            </div>
+            
+            <button type="submit" id="loginBtn" class="login-btn">
+                <span id="btnText">Login ➔</span>
+                <span id="btnLoader" class="hidden">Verifying...</span>
+            </button>
+        </form>
+
+        <div class="footer-links">
+            <a href="#" id="forgotPin">Forgot PIN? Contact Administrator</a>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
