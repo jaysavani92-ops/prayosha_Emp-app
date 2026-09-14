@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Task Management - Prayosha</title>
+    <link rel="stylesheet" href="emp_style.css">
+    <!-- Injecting Tailwind & Lucide for your custom UI design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { padding-top: 80px; padding-bottom: 80px; background-color: #f4f7f6; }
+    </style>
+</head>
+<body>
+    <script src="emp_nav_components.js"></script>
+    <script>
+        const TASK_API_URL = "https://script.google.com/macros/s/AKfycbzOKLZzMoG4eAmdHBT0MeRIkQza3eq043oxr_Cs08_0OmSt8F0U-qUX0nmyUlpA13JtKw/exec";
+
+        // Global Fetch Wrapper to replace google.script.run
+        async function apiCall(action, payload = {}) {
+            const projectId = localStorage.getItem('assignedProject');
+            try {
+                const response = await fetch(TASK_API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: action, projectId: projectId, ...payload }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                return await response.json();
+            } catch (err) {
+                console.error("API Error:", err);
+                return { success: false, message: "Network Error" };
+            }
+        }
+    </script>
+
+    <!-- Paste the EXACT HTML structure from your Module_Tasks.html[cite: 1] here, from <div class="glass-panel-light..."> down to the end of the modals -->
+    <div class="glass-panel-light p-6 md:p-8 max-w-6xl mx-auto relative shadow-sm" id="tasksModuleWrapper">
+        <div id="tskFormOverlay" class="absolute inset-0 bg-white/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-[1.25rem] font-black text-xl text-[#1E3A5F] flex-col gap-3">
+            <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-[#F59E0B]"></i> 
+            <span>Syncing Database...</span>
+        </div>
+
+        <div class="flex gap-2 mb-8 border-b border-slate-200/50 pb-4 overflow-x-auto whitespace-nowrap">
+            <button id="tabActive" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-[#1E3A5F] text-white shadow-md">Active Tasks</button>
+            <button id="tabTimeline" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50">Zone Timeline</button>
+        </div>
+
+        <!-- Section: Active Tasks -->
+        <div id="sectionActive" class="tab-section block animate-in fade-in"><div id="activeTasksBody" class="space-y-3"></div></div>
+        
+        <!-- Section: Timeline -->
+        <div id="sectionTimeline" class="tab-section hidden animate-in fade-in">
+             <div class="border-t border-slate-200/60 pt-6 mt-6" id="timelineDataContainer">
+                <div class="text-center p-8 text-slate-400 font-bold">Timeline view ready.</div>
+             </div>
+        </div>
+    </div>
+
+    <!-- Adapted Initialization Script -->
+    <script>
+        var siteHierarchy = {}; 
+        var globalTasksData = null; 
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!localStorage.getItem('userToken')) window.location.href = 'emp_index.html';
+            lucide.createIcons();
+            initTaskModule();
+            
+            document.getElementById('tabActive').onclick = () => switchTskTab('sectionActive', 'tabActive');
+            document.getElementById('tabTimeline').onclick = () => switchTskTab('sectionTimeline', 'tabTimeline');
+        });
+
+        function switchTskTab(sectionId, btnId) {
+            document.querySelectorAll('.tab-section').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tsk-tab').forEach(el => el.className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50');
+            
+            document.getElementById(sectionId).style.display = 'block';
+            document.getElementById(btnId).className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-[#1E3A5F] text-white shadow-md';
+        }
+
+        async function initTaskModule() {
+            // Replaces google.script.run.getZoneHierarchy()[cite: 1]
+            const hierarchyRes = await apiCall('getZoneHierarchy');
+            if (hierarchyRes.success) siteHierarchy = hierarchyRes.data;
+
+            // Replaces google.script.run.getCategorizedTasksData()[cite: 1]
+            const tasksRes = await apiCall('getCategorizedTasksData');
+            if (tasksRes.success) {
+                globalTasksData = tasksRes.data;
+                renderActiveTasks(globalTasksData.active);
+            }
+            
+            document.getElementById('tskFormOverlay').style.display = 'none';
+        }
+
+        function renderActiveTasks(tasks) {
+            const container = document.getElementById('activeTasksBody');
+            if (!tasks || tasks.length === 0) {
+                container.innerHTML = '<div class="text-center p-8 text-slate-400 font-bold">No active tasks found for your project.</div>';
+                return;
+            }
+            
+            let html = '';
+            tasks.forEach(task => {
+                html += `
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center mb-3">
+                    <div>
+                        <h4 class="font-black text-[#1E3A5F]">${task.desc}</h4>
+                        <p class="text-xs text-slate-500 font-bold">Zone: ${task.zone} | Agency: ${task.agency}</p>
+                    </div>
+                    <select class="rounded-full px-3 py-1.5 text-xs font-black outline-none bg-slate-100 border border-slate-200">
+                        <option value="Not Started" ${task.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                        <option value="On-Going" ${task.status === 'On-Going' ? 'selected' : ''}>On-Going</option>
+                        <option value="Ready for QC" ${task.status === 'Ready for QC' ? 'selected' : ''}>Ready for QC</option>
+                    </select>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
