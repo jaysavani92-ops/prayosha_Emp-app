@@ -9,10 +9,12 @@
 body, html {
     height: 100%;
     width: 100%;
-    background-color: #1a1a1a;
+    /* Updated to a soft light gray/white for clean contrast */
+    background-color: #f4f7f6; 
+    color: #333333;
 }
 
-/* Background Image with Dark/Warm Overlay */
+/* --- Login Page Styles --- */
 .login-container {
     height: 100vh;
     width: 100%;
@@ -21,11 +23,9 @@ body, html {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    /* Replace 'construction-bg.jpg' with your hosted background image URL */
     background: linear-gradient(rgba(40, 30, 20, 0.7), rgba(20, 20, 20, 0.9)), url('construction-bg.jpg') no-repeat center center/cover;
 }
 
-/* White Logo Card */
 .logo-box {
     background-color: #ffffff;
     padding: 20px 40px;
@@ -40,7 +40,6 @@ body, html {
     display: block;
 }
 
-/* Typography */
 .text-content {
     text-align: left;
     width: 100%;
@@ -62,7 +61,6 @@ body, html {
     line-height: 1.4;
 }
 
-/* Form Styles */
 .login-form {
     width: 100%;
     max-width: 400px;
@@ -71,7 +69,6 @@ body, html {
     gap: 20px;
 }
 
-/* Translucent PIN Input */
 .input-group input {
     width: 100%;
     padding: 15px 20px;
@@ -98,7 +95,6 @@ body, html {
     transform: translateY(-5px);
 }
 
-/* Yellow Pill Button */
 .login-btn {
     width: 100%;
     padding: 16px;
@@ -123,12 +119,10 @@ body, html {
     background-color: #e59626;
 }
 
-/* Utility Classes */
 .hidden {
     display: none !important;
 }
 
-/* Footer Link */
 .footer-links {
     margin-top: 30px;
 }
@@ -143,6 +137,7 @@ body, html {
 .footer-links a:hover {
     color: #ffffff;
 }
+
 /* --- Navigation Bars (Blueprint Theme) --- */
 body {
     padding-top: 80px; 
@@ -152,7 +147,7 @@ body {
 .top-nav {
     position: fixed; top: 0; left: 0; right: 0;
     height: 65px;
-    background-color: #0A192F; /* Deep Navy Blue */
+    background-color: #0A192F; 
     display: flex; justify-content: space-between; align-items: center;
     padding: 0 20px; z-index: 1000;
     box-shadow: 0 2px 10px rgba(0,0,0,0.5);
@@ -161,7 +156,7 @@ body {
 
 .top-nav img { height: 40px; background: #fff; padding: 2px 10px; border-radius: 4px; }
 
-.notification-bell { position: relative; font-size: 1.5rem; cursor: pointer; }
+.notification-bell { position: relative; font-size: 1.5rem; cursor: pointer; color: #ffffff; }
 
 .badge {
     position: absolute; top: -5px; right: -8px;
@@ -188,7 +183,26 @@ body {
 .nav-item.active, .nav-item:hover { color: #f7a838; }
 .nav-icon { font-size: 1.5rem; margin-bottom: 2px; }
 
-/* --- Dashboard Module Grid --- */
+/* --- Dashboard Module Grid (Light Mode) --- */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.user-card {
+    background: #ffffff;
+    padding: 15px; 
+    border-radius: 8px; 
+    border-left: 4px solid #f7a838; 
+    text-align: left; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 10px;
+}
+
+.user-card p { color: #666666; margin-bottom: 8px; }
+.user-card strong { color: #111111; }
+
 .module-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -196,16 +210,17 @@ body {
 }
 
 .module-card {
-    background-color: #2a2a2a;
+    background-color: #ffffff;
     border-left: 4px solid #f7a838;
     padding: 20px 10px; border-radius: 8px;
-    text-align: center; text-decoration: none; color: #ffffff;
+    text-align: center; text-decoration: none; color: #111111;
     transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .module-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(247, 168, 56, 0.2);
+    box-shadow: 0 8px 15px rgba(247, 168, 56, 0.2);
 }
 
 .card-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
