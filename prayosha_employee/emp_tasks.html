@@ -19,19 +19,27 @@
 <body>
     <script src="emp_nav_components.js"></script>
     <script>
+        // Your exact Apps Script URL
         const TASK_API_URL = "https://script.google.com/macros/s/AKfycbzOKLZzMoG4eAmdHBT0MeRIkQza3eq043oxr_Cs08_0OmSt8F0U-qUX0nmyUlpA13JtKw/exec";
 
         async function apiCall(action, payload = {}) {
-            const projectId = localStorage.getItem('assignedProject');
+            const projectId = localStorage.getItem('assignedProject') || 'PRYA-01'; // Fallback for testing
             try {
                 const response = await fetch(TASK_API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: action, projectId: projectId, ...payload }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
-                return await response.json();
+                
+                const rawText = await response.text(); 
+                try {
+                    return JSON.parse(rawText);
+                } catch (parseError) {
+                    alert(`🚨 PERMISSION BLOCK on [${action}]: Google returned an HTML error instead of data. Check Web App permissions.`);
+                    return { success: false, message: "Permissions Error" };
+                }
             } catch (err) {
-                console.error("API Error:", err);
+                alert(`🚨 NETWORK ERROR on [${action}]: Cannot reach Google Apps Script.`);
                 return { success: false, message: "Network Error" };
             }
         }
@@ -80,7 +88,7 @@
             <div class="mb-6">
                 <label class="block text-[10px] font-extrabold text-[#1E3A5F] uppercase tracking-widest mb-2">Applicable Work Zones</label>
                 <div id="taskZones" class="glass-input rounded-xl p-4 max-h-48 overflow-y-auto bg-white border border-slate-200">
-                    <div class="text-sm font-bold text-slate-400 text-center">Select Phase, Floor, and Category to view zones.</div>
+                    <div class="text-sm font-bold text-slate-400 text-center">Select Tower, Floor, and Unit Type to view zones.</div>
                 </div>
             </div>
             
@@ -107,9 +115,9 @@
         </div>
 
         <!-- Placeholder Sections for other tabs (Data populated dynamically) -->
-        <div id="sectionActive" class="tab-section hidden"><div id="activeTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">No active tasks found. Assign tasks in the Log tab.</div></div>
-        <div id="sectionDelayed" class="tab-section hidden"><div id="delayedTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">No delayed tasks found.</div></div>
-        <div id="sectionHistory" class="tab-section hidden"><div id="historyTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">No task history found.</div></div>
+        <div id="sectionActive" class="tab-section hidden"><div id="activeTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">Active tasks view ready.</div></div>
+        <div id="sectionDelayed" class="tab-section hidden"><div id="delayedTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">Delayed tasks view ready.</div></div>
+        <div id="sectionHistory" class="tab-section hidden"><div id="historyTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">Task history view ready.</div></div>
         <div id="sectionTimeline" class="tab-section hidden"><div id="timelineDataContainer" class="p-8 text-center text-slate-400 font-bold">Timeline view ready.</div></div>
         <div id="sectionIssue" class="tab-section hidden"><div class="p-8 text-center text-slate-400 font-bold">Issue Tracker Module UI Loaded.</div></div>
     </div>
@@ -143,9 +151,17 @@
             if (hierarchyRes.success) {
                 siteHierarchy = hierarchyRes.data;
                 const phaseSelect = document.getElementById('taskPhase');
-                Object.keys(siteHierarchy).forEach(phase => {
-                    phaseSelect.innerHTML += `<option value="${phase}">${phase}</option>`;
-                });
+                const towers = Object.keys(siteHierarchy);
+                
+                if (towers.length === 0) {
+                    alert("⚠️ Map_Zones tab is empty or invalid. Dropdowns will remain blank until populated.");
+                } else {
+                    towers.forEach(phase => {
+                        phaseSelect.innerHTML += `<option value="${phase}">${phase}</option>`;
+                    });
+                }
+            } else {
+                alert(`⚠️ BACKEND ERROR (Hierarchy): ${hierarchyRes.message}`);
             }
 
             // 2. Fetch Agencies
@@ -153,12 +169,16 @@
             if (agenciesRes.success) {
                 const agencySelect = document.getElementById('taskAgency');
                 agenciesRes.data.forEach(ag => agencySelect.innerHTML += `<option value="${ag}">${ag}</option>`);
+            } else {
+                alert(`⚠️ BACKEND ERROR (Agencies): ${agenciesRes.message}`);
             }
 
             // 3. Fetch Master Checklists
             const checkRes = await apiCall('getChecklists');
             if (checkRes.success) {
                 globalChecklists = checkRes.data;
+            } else {
+                alert(`⚠️ BACKEND ERROR (Checklists): ${checkRes.message}`);
             }
 
             document.getElementById('tskFormOverlay').style.display = 'none';
@@ -196,16 +216,14 @@
                 taskDropdown.innerHTML = '<option value="">-- Select Task --</option>';
 
                 if (phase && floor && cat && siteHierarchy[phase][floor][cat]) {
-                    // Populate Checkboxes
                     siteHierarchy[phase][floor][cat].forEach(zone => {
                         zoneContainer.innerHTML += `
-                        <div class="flex items-center gap-3 mb-2">
+                        <div class="flex items-center gap-3 mb-2 border-b border-slate-100 pb-2">
                             <input type="checkbox" name="taskZoneSelection" value="${zone.id}" class="w-4 h-4 rounded text-[#F59E0B]">
                             <label class="text-sm font-bold text-[#1E3A5F]">${zone.label}</label>
                         </div>`;
                     });
 
-                    // Populate Tasks from globalChecklists
                     if (globalChecklists[cat]) {
                         globalChecklists[cat].forEach(t => taskDropdown.innerHTML += `<option value="${t}">${t}</option>`);
                     }
@@ -227,7 +245,7 @@
                 };
 
                 if (checked.length === 0 || !payload.description || !payload.agency) {
-                    msg.innerHTML = '<span class="text-rose-500">Please complete all fields and select zones.</span>';
+                    msg.innerHTML = '<span class="text-rose-500">Please complete all fields and select at least one zone.</span>';
                     return;
                 }
 
