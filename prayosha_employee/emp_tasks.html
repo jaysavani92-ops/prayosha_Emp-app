@@ -60,7 +60,7 @@
         </div>
 
         <!-- SECTION: LOG NEW TASK -->
-        <div id="sectionLog" class="tab-section block animate-in fade-in">
+        <div id="sectionLog" class="tab-section hidden animate-in fade-in">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
                     <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Tower / Block</label>
@@ -192,18 +192,36 @@
             
             tabs.forEach((id, i) => {
                 document.getElementById(id).onclick = () => {
-                    sections.forEach(sec => document.getElementById(sec).style.display = 'none');
-                    tabs.forEach(tab => document.getElementById(tab).className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50');
-                    document.getElementById(sections[i]).style.display = 'block';
+                    // Completely hide all sections via classList
+                    sections.forEach(sec => {
+                        const el = document.getElementById(sec);
+                        el.classList.add('hidden');
+                        el.classList.remove('block');
+                    });
+                    
+                    // Reset all tab button styles
+                    tabs.forEach(tab => {
+                        document.getElementById(tab).className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50';
+                    });
+                    
+                    // Show active section
+                    const activeSec = document.getElementById(sections[i]);
+                    activeSec.classList.remove('hidden');
+                    activeSec.classList.add('block');
+                    
+                    // Highlight active tab button
                     document.getElementById(id).className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-[#1E3A5F] text-white shadow-md';
                     
+                    // Fetch data if clicking a dynamic tab
                     if (['tabActive', 'tabDelayed', 'tabHistory', 'tabTimeline'].includes(id)) {
                         fetchTasksOverview();
                     }
                 };
             });
 
+            // Initialize the module and automatically click the first tab to render it
             initTaskModule();
+            document.getElementById('tabLog').click();
         });
 
         function toggleAcc(id) {
@@ -397,10 +415,14 @@
                 siteHierarchy = hierarchyRes.data;
                 const phaseSelect = document.getElementById('taskPhase');
                 const tlPhaseSelect = document.getElementById('timelinePhase');
-                Object.keys(siteHierarchy).forEach(phase => {
-                    phaseSelect.innerHTML += `<option value="${phase}">${phase}</option>`;
-                    tlPhaseSelect.innerHTML += `<option value="${phase}">${phase}</option>`;
-                });
+                const towers = Object.keys(siteHierarchy);
+                
+                if (towers.length > 0) {
+                    towers.forEach(phase => {
+                        phaseSelect.innerHTML += `<option value="${phase}">${phase}</option>`;
+                        tlPhaseSelect.innerHTML += `<option value="${phase}">${phase}</option>`;
+                    });
+                }
             }
 
             const agenciesRes = await apiCall('getTaskAgencies');
