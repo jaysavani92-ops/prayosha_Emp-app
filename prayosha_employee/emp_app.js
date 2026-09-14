@@ -40,7 +40,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             if (data.role === 'Director') {
                 window.location.href = 'director_dashboard.html';
             } else if (data.role === 'Employee' || data.role === 'Site Manager') {
-                window.location.href = 'employee_dashboard.html';
+                window.location.href = 'emp_dashboard.html';
             } else {
                 window.location.href = 'agency_dashboard.html';
             }
