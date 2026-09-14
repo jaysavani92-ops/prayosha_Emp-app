@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Task Management - Prayosha</title>
     <link rel="stylesheet" href="emp_style.css">
-    <!-- Injecting Tailwind & Lucide for your custom UI design -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { padding-top: 80px; padding-bottom: 80px; background-color: #f4f7f6; }
+        .glass-panel-light { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 1.5rem; }
+        .glass-input { background: rgba(248, 250, 252, 0.8); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -17,7 +21,6 @@
     <script>
         const TASK_API_URL = "https://script.google.com/macros/s/AKfycbzOKLZzMoG4eAmdHBT0MeRIkQza3eq043oxr_Cs08_0OmSt8F0U-qUX0nmyUlpA13JtKw/exec";
 
-        // Global Fetch Wrapper to replace google.script.run
         async function apiCall(action, payload = {}) {
             const projectId = localStorage.getItem('assignedProject');
             try {
@@ -34,89 +37,215 @@
         }
     </script>
 
-    <!-- Paste the EXACT HTML structure from your Module_Tasks.html[cite: 1] here, from <div class="glass-panel-light..."> down to the end of the modals -->
-    <div class="glass-panel-light p-6 md:p-8 max-w-6xl mx-auto relative shadow-sm" id="tasksModuleWrapper">
+    <div class="glass-panel-light p-6 md:p-8 max-w-6xl mx-auto relative shadow-sm mt-4" id="tasksModuleWrapper">
         <div id="tskFormOverlay" class="absolute inset-0 bg-white/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-[1.25rem] font-black text-xl text-[#1E3A5F] flex-col gap-3">
             <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-[#F59E0B]"></i> 
             <span>Syncing Database...</span>
         </div>
 
-        <div class="flex gap-2 mb-8 border-b border-slate-200/50 pb-4 overflow-x-auto whitespace-nowrap">
-            <button id="tabActive" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-[#1E3A5F] text-white shadow-md">Active Tasks</button>
-            <button id="tabTimeline" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50">Zone Timeline</button>
+        <!-- FULL TAB NAVIGATION -->
+        <div class="flex gap-2 mb-8 border-b border-slate-200/50 pb-4 overflow-x-auto custom-scrollbar whitespace-nowrap">
+            <button id="tabLog" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-[#1E3A5F] text-white shadow-md">Log New Task</button>
+            <button id="tabActive" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50">Active</button>
+            <button id="tabDelayed" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50">Delayed</button>
+            <button id="tabHistory" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50">History</button>
+            <button id="tabTimeline" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50">Timeline</button>
+            <button id="tabIssue" class="tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50">Raise Issue</button>
         </div>
 
-        <!-- Section: Active Tasks -->
-        <div id="sectionActive" class="tab-section block animate-in fade-in"><div id="activeTasksBody" class="space-y-3"></div></div>
-        
-        <!-- Section: Timeline -->
-        <div id="sectionTimeline" class="tab-section hidden animate-in fade-in">
-             <div class="border-t border-slate-200/60 pt-6 mt-6" id="timelineDataContainer">
-                <div class="text-center p-8 text-slate-400 font-bold">Timeline view ready.</div>
-             </div>
+        <!-- Section 1: Log New Task -->
+        <div id="sectionLog" class="tab-section block animate-in fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Phase</label>
+                    <select id="taskPhase" class="glass-input w-full rounded-xl px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#F59E0B]">
+                        <option value="">-- Select --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Floor</label>
+                    <select id="taskFloor" class="glass-input w-full rounded-xl px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#F59E0B]"><option value="">-- Select --</option></select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Category</label>
+                    <select id="taskCategory" class="glass-input w-full rounded-xl px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#F59E0B]"><option value="">-- Select --</option></select>
+                </div>
+            </div>
+            
+            <div class="mb-6 bg-blue-50/50 border border-blue-100 p-5 rounded-[1.25rem]">
+                <label class="block text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-2">Select Task / Checklist Point</label>
+                <select id="taskChecklist" class="glass-input w-full rounded-xl px-4 py-3 font-bold text-blue-900 outline-none bg-white"><option value="">-- Select Category First --</option></select>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-[10px] font-extrabold text-[#1E3A5F] uppercase tracking-widest mb-2">Applicable Work Zones</label>
+                <div id="taskZones" class="glass-input rounded-xl p-4 max-h-48 overflow-y-auto bg-white border border-slate-200">
+                    <div class="text-sm font-bold text-slate-400 text-center">Select Phase, Floor, and Category to view zones.</div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Assigned Agency</label>
+                    <select id="taskAgency" class="glass-input w-full rounded-xl px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#F59E0B]"><option value="">-- Select Agency --</option></select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Initial Status</label>
+                    <select id="taskStatus" class="glass-input w-full rounded-xl px-4 py-3 font-bold text-slate-700 outline-none">
+                        <option value="Not Started">Not Started</option>
+                        <option value="On-Going">On-Going</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
+                <div id="taskStatusMsg" class="font-bold text-sm"></div>
+                <button id="submitTaskBtn" class="bg-[#1E3A5F] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg hover:bg-[#152943] transition flex items-center gap-2">
+                    <i data-lucide="save" class="w-5 h-5"></i> Assign Task to Zones
+                </button>
+            </div>
         </div>
+
+        <!-- Placeholder Sections for other tabs (Data populated dynamically) -->
+        <div id="sectionActive" class="tab-section hidden"><div id="activeTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">No active tasks found. Assign tasks in the Log tab.</div></div>
+        <div id="sectionDelayed" class="tab-section hidden"><div id="delayedTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">No delayed tasks found.</div></div>
+        <div id="sectionHistory" class="tab-section hidden"><div id="historyTasksBody" class="space-y-3 p-8 text-center text-slate-400 font-bold">No task history found.</div></div>
+        <div id="sectionTimeline" class="tab-section hidden"><div id="timelineDataContainer" class="p-8 text-center text-slate-400 font-bold">Timeline view ready.</div></div>
+        <div id="sectionIssue" class="tab-section hidden"><div class="p-8 text-center text-slate-400 font-bold">Issue Tracker Module UI Loaded.</div></div>
     </div>
 
-    <!-- Adapted Initialization Script -->
     <script>
-        var siteHierarchy = {}; 
-        var globalTasksData = null; 
+        let siteHierarchy = {}; 
+        let globalChecklists = {};
 
         document.addEventListener("DOMContentLoaded", () => {
             if (!localStorage.getItem('userToken')) window.location.href = 'emp_index.html';
             lucide.createIcons();
-            initTaskModule();
             
-            document.getElementById('tabActive').onclick = () => switchTskTab('sectionActive', 'tabActive');
-            document.getElementById('tabTimeline').onclick = () => switchTskTab('sectionTimeline', 'tabTimeline');
+            const tabs = ['tabLog', 'tabActive', 'tabDelayed', 'tabHistory', 'tabTimeline', 'tabIssue'];
+            const sections = ['sectionLog', 'sectionActive', 'sectionDelayed', 'sectionHistory', 'sectionTimeline', 'sectionIssue'];
+            
+            tabs.forEach((id, i) => {
+                document.getElementById(id).onclick = () => {
+                    sections.forEach(sec => document.getElementById(sec).style.display = 'none');
+                    tabs.forEach(tab => document.getElementById(tab).className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50');
+                    document.getElementById(sections[i]).style.display = 'block';
+                    document.getElementById(id).className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-[#1E3A5F] text-white shadow-md';
+                };
+            });
+
+            initTaskModule();
         });
 
-        function switchTskTab(sectionId, btnId) {
-            document.querySelectorAll('.tab-section').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.tsk-tab').forEach(el => el.className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition text-slate-500 hover:bg-white/50');
-            
-            document.getElementById(sectionId).style.display = 'block';
-            document.getElementById(btnId).className = 'tsk-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-[#1E3A5F] text-white shadow-md';
-        }
-
         async function initTaskModule() {
-            // Replaces google.script.run.getZoneHierarchy()[cite: 1]
+            // 1. Fetch Hierarchy (Towers/Flats)
             const hierarchyRes = await apiCall('getZoneHierarchy');
-            if (hierarchyRes.success) siteHierarchy = hierarchyRes.data;
-
-            // Replaces google.script.run.getCategorizedTasksData()[cite: 1]
-            const tasksRes = await apiCall('getCategorizedTasksData');
-            if (tasksRes.success) {
-                globalTasksData = tasksRes.data;
-                renderActiveTasks(globalTasksData.active);
+            if (hierarchyRes.success) {
+                siteHierarchy = hierarchyRes.data;
+                const phaseSelect = document.getElementById('taskPhase');
+                Object.keys(siteHierarchy).forEach(phase => {
+                    phaseSelect.innerHTML += `<option value="${phase}">${phase}</option>`;
+                });
             }
-            
+
+            // 2. Fetch Agencies
+            const agenciesRes = await apiCall('getTaskAgencies');
+            if (agenciesRes.success) {
+                const agencySelect = document.getElementById('taskAgency');
+                agenciesRes.data.forEach(ag => agencySelect.innerHTML += `<option value="${ag}">${ag}</option>`);
+            }
+
+            // 3. Fetch Master Checklists
+            const checkRes = await apiCall('getChecklists');
+            if (checkRes.success) {
+                globalChecklists = checkRes.data;
+            }
+
             document.getElementById('tskFormOverlay').style.display = 'none';
+            setupCascadingDropdowns();
         }
 
-        function renderActiveTasks(tasks) {
-            const container = document.getElementById('activeTasksBody');
-            if (!tasks || tasks.length === 0) {
-                container.innerHTML = '<div class="text-center p-8 text-slate-400 font-bold">No active tasks found for your project.</div>';
-                return;
-            }
-            
-            let html = '';
-            tasks.forEach(task => {
-                html += `
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center mb-3">
-                    <div>
-                        <h4 class="font-black text-[#1E3A5F]">${task.desc}</h4>
-                        <p class="text-xs text-slate-500 font-bold">Zone: ${task.zone} | Agency: ${task.agency}</p>
-                    </div>
-                    <select class="rounded-full px-3 py-1.5 text-xs font-black outline-none bg-slate-100 border border-slate-200">
-                        <option value="Not Started" ${task.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
-                        <option value="On-Going" ${task.status === 'On-Going' ? 'selected' : ''}>On-Going</option>
-                        <option value="Ready for QC" ${task.status === 'Ready for QC' ? 'selected' : ''}>Ready for QC</option>
-                    </select>
-                </div>`;
-            });
-            container.innerHTML = html;
+        function setupCascadingDropdowns() {
+            document.getElementById('taskPhase').onchange = function() {
+                const phase = this.value;
+                const floorSelect = document.getElementById('taskFloor');
+                floorSelect.innerHTML = '<option value="">-- Select --</option>';
+                if (phase && siteHierarchy[phase]) {
+                    Object.keys(siteHierarchy[phase]).forEach(floor => floorSelect.innerHTML += `<option value="${floor}">${floor}</option>`);
+                }
+            };
+
+            document.getElementById('taskFloor').onchange = function() {
+                const phase = document.getElementById('taskPhase').value;
+                const floor = this.value;
+                const catSelect = document.getElementById('taskCategory');
+                catSelect.innerHTML = '<option value="">-- Select --</option>';
+                if (phase && floor && siteHierarchy[phase][floor]) {
+                    Object.keys(siteHierarchy[phase][floor]).forEach(cat => catSelect.innerHTML += `<option value="${cat}">${cat}</option>`);
+                }
+            };
+
+            document.getElementById('taskCategory').onchange = function() {
+                const phase = document.getElementById('taskPhase').value;
+                const floor = document.getElementById('taskFloor').value;
+                const cat = this.value;
+                const zoneContainer = document.getElementById('taskZones');
+                const taskDropdown = document.getElementById('taskChecklist');
+                
+                zoneContainer.innerHTML = '';
+                taskDropdown.innerHTML = '<option value="">-- Select Task --</option>';
+
+                if (phase && floor && cat && siteHierarchy[phase][floor][cat]) {
+                    // Populate Checkboxes
+                    siteHierarchy[phase][floor][cat].forEach(zone => {
+                        zoneContainer.innerHTML += `
+                        <div class="flex items-center gap-3 mb-2">
+                            <input type="checkbox" name="taskZoneSelection" value="${zone.id}" class="w-4 h-4 rounded text-[#F59E0B]">
+                            <label class="text-sm font-bold text-[#1E3A5F]">${zone.label}</label>
+                        </div>`;
+                    });
+
+                    // Populate Tasks from globalChecklists
+                    if (globalChecklists[cat]) {
+                        globalChecklists[cat].forEach(t => taskDropdown.innerHTML += `<option value="${t}">${t}</option>`);
+                    }
+                }
+            };
+
+            document.getElementById('submitTaskBtn').onclick = async function() {
+                const btn = this;
+                const msg = document.getElementById('taskStatusMsg');
+                const checked = Array.from(document.querySelectorAll('input[name="taskZoneSelection"]:checked')).map(cb => cb.value);
+                
+                const payload = {
+                    phase: document.getElementById('taskPhase').value,
+                    zoneIds: checked,
+                    description: document.getElementById('taskChecklist').value,
+                    agency: document.getElementById('taskAgency').value,
+                    status: document.getElementById('taskStatus').value,
+                    user: localStorage.getItem('userName') || 'Site Manager'
+                };
+
+                if (checked.length === 0 || !payload.description || !payload.agency) {
+                    msg.innerHTML = '<span class="text-rose-500">Please complete all fields and select zones.</span>';
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = 'Assigning...';
+                
+                const res = await apiCall('addCivilTask', payload);
+                
+                if (res.success) {
+                    msg.innerHTML = `<span class="text-emerald-600">${res.message}</span>`;
+                    document.querySelectorAll('input[name="taskZoneSelection"]').forEach(cb => cb.checked = false);
+                } else {
+                    msg.innerHTML = `<span class="text-rose-500">${res.message}</span>`;
+                }
+                
+                btn.disabled = false;
+                btn.innerHTML = 'Assign Task to Zones';
+            };
         }
     </script>
 </body>
